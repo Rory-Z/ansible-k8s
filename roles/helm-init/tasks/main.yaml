@@ -1,0 +1,31 @@
+- name: download helm
+  get_url:
+    url: https://storage.googleapis.com/kubernetes-helm/helm-v2.13.1-linux-amd64.tar.gz
+    dest: /tmp/helm.tar.gz
+
+- name: unarchive helm
+  unarchive:
+    src: /tmp/helm.tar.gz
+    remote_src: yes
+    dest: /tmp
+
+- name: install helm
+  become: yes
+  become_user: root
+  become_method: sudo
+  shell: mv /tmp/linux-amd64/helm /usr/local/bin/helm
+
+- name: scp tiller rbac
+  copy:
+    src: rbac-tiller.yaml
+    dest: /tmp/rbac-tiller.yaml
+    owner: "{{ user }}"
+    group: "{{ user }}"
+    mode: 0755
+
+- name: helm init
+  shell: |
+    kubectl create -f /tmp/rbac-tiller.yaml
+    kubectl taint nodes "{{ ansible_hostname }}" node-role.kubernetes.io/master:NoSchedule-
+    helm init --service-account tiller --node-selectors kubernetes.io/hostname="{{ ansible_hostname }}"
+    kubectl taint nodes "{{ ansible_hostname }}" node-role.kubernetes.io/master=:NoSchedule

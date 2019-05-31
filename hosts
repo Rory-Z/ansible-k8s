@@ -1,0 +1,13 @@
+[k8s-master]
+13.113.192.93
+
+[k8s-worker]
+54.238.226.225
+54.64.202.180
+
+[k8s]
+[k8s:children]
+k8s-master
+k8s-worker
+[k8s:vars]
+ansible_ssh_user=ubuntu

@@ -1,0 +1,37 @@
+- name: create temp dir
+  delegate_to: localhost
+  file: 
+    path: /tmp/special 
+    state: directory 
+    mode: 0755
+
+- name: check private key
+  stat: 
+    path: ~/.ssh/id_rsa
+  register: st
+
+- name: create key pairs
+  shell:  ssh-keygen -t rsa -N "" -f ~/.ssh/id_rsa -q -b 2048 -C "com"
+  when: st.stat.exists == False
+
+- name: get the public key
+  fetch:
+    src: ~/.ssh/id_rsa.pub
+    dest: /tmp/special/
+
+- name: get key list
+  connection: local
+  shell: cat /tmp/special/*/home/"{{ ansible_ssh_user }}"/.ssh/id_rsa.pub
+  register: key_list
+
+- name: add keys
+  lineinfile:
+    dest: ~/.ssh/authorized_keys
+    line: "{{ item }}"
+  with_items: "{{ key_list.stdout_lines }}"
+
+- name: remove old keys
+  delegate_to: localhost
+  file:  
+    path: /tmp/special/*/home/"{{ ansible_ssh_user }}"/.ssh/id_rsa.pub
+    state: absent

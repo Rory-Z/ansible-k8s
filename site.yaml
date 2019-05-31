@@ -1,0 +1,42 @@
+- hosts: k8s
+  gather_facts: no 
+  roles:
+    - ssh-copy
+
+- hosts: k8s
+  vars:
+    - kubeedge: false
+  remote_user: ubuntu
+  become: yes
+  become_user: root
+  become_method: sudo 
+  roles:
+    - install-docker
+    - install-kubeadm
+    
+- hosts: k8s-master
+  remote_user: ubuntu
+  become: yes
+  become_user: root
+  become_method: sudo
+  roles:
+    - role: kubeadm-init
+      user: ubuntu
+  tags:
+    - kubeadm
+
+- hosts: k8s-master
+  roles:
+    - role: helm-init
+      user: ubuntu
+  tags:
+    - helm
+
+- hosts: k8s-worker
+  gather_facts: no 
+  remote_user: ubuntu
+  become: yes
+  become_user: root
+  become_method: sudo
+  roles:
+    - kubeadm-join

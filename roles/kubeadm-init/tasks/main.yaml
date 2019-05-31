@@ -1,0 +1,32 @@
+- name: pull kubeadm images
+  shell: kubeadm config images pull
+
+- name: kubeadm init
+  shell: kubeadm init --pod-network-cidr=10.244.0.0/16
+  register: kubeadm_init
+
+- name: set facts
+  set_fact: 
+    k8s_master_ip: "{{ kubeadm_ip.stdout }}"
+    k8s_token: "{{ kubeadm_token.stdout }}"
+    k8s_ca_cert_hash: "{{ kubeadm_ca_cert_hash.stdout }}"
+
+- name: kubeadm init status
+  debug: 
+    var: kubeadm_init.stdout_lines
+
+- name: create kube directory
+  file:
+    path: "/home/{{ user }}/.kube"
+    state: directory
+    owner: "{{ user }}"
+    group: "{{ user }}"
+
+- name: kubectl init
+  shell: |
+    cp -i /etc/kubernetes/admin.conf /home/{{user}}/.kube/config
+    chown 1000:1000 /home/{{ user }}/.kube/config
+
+- name: install fannel
+  become: no
+  shell: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml

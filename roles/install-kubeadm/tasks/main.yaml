@@ -1,0 +1,32 @@
+- name: disable iptables and swap
+  shell: |
+    swapoff -a
+    iptables -P INPUT ACCEPT
+    iptables -P FORWARD ACCEPT
+    iptables -P OUTPUT ACCEPT
+    iptables -F && iptables -t nat -F && iptables -t mangle -F && iptables -X
+
+- name: install kubeadm 1
+  apt:
+    update_cache: yes
+    name:
+      - apt-transport-https
+      - curl
+
+- name: install kubeadm 2
+  apt_key:
+    url: https://packages.cloud.google.com/apt/doc/apt-key.gpg
+    state: present
+
+- name: install kubeadm 3
+  shell: echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" >> /etc/apt/sources.list
+  # apt_repository:
+    # repo: deb https://apt.kubernetes.io/ kubernetes-xenial main
+    
+- name: install kubeadm 4
+  apt:
+    update_cache: yes
+    name:
+      - kubelet
+      - kubeadm
+      - kubectl
