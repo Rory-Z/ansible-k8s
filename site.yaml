@@ -4,6 +4,7 @@
     - ssh-copy
 
 - hosts: k8s
+  gather_facts: no
   vars:
     - kubeedge: false
   remote_user: ubuntu
@@ -15,6 +16,7 @@
     - install-kubeadm
     
 - hosts: k8s-master
+  gather_facts: no
   remote_user: ubuntu
   become: yes
   become_user: root
