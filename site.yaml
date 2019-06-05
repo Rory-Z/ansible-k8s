@@ -1,7 +1,9 @@
 - hosts: k8s
   gather_facts: no 
   roles:
-    - ssh-copy
+    - 00-ssh-copy
+  tags:
+    - prepare
 
 - hosts: k8s
   gather_facts: no
@@ -12,8 +14,10 @@
   become_user: root
   become_method: sudo 
   roles:
-    - install-docker
-    - install-kubeadm
+    - 01-install-docker
+    - 01-install-kubeadm
+  tags:
+    - prepare
     
 - hosts: k8s-master
   gather_facts: no
@@ -22,17 +26,17 @@
   become_user: root
   become_method: sudo
   roles:
-    - role: kubeadm-init
+    - role: 02-init-master
       user: ubuntu
   tags:
-    - kubeadm
+    - init_master
 
 - hosts: k8s-master
   roles:
-    - role: helm-init
+    - role: 03-init-helm
       user: ubuntu
   tags:
-    - helm
+    - init_helm
 
 - hosts: k8s-worker
   gather_facts: no 
@@ -41,4 +45,6 @@
   become_user: root
   become_method: sudo
   roles:
-    - kubeadm-join
+    - 04-join-nodes
+  tags:
+    - join_nodes
