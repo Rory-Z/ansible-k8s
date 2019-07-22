@@ -25,3 +25,17 @@
       - docker-ce 
       - docker-ce-cli 
       - containerd.io
+
+- name: add docker user
+  shell: |
+    if [ -z $(egrep "^docker" /etc/group) ];then groupadd docker; fi
+    usermod -aG docker ubuntu
+    mkdir -p /home/ubuntu/.docker
+    chown ubuntu:ubuntu /home/ubuntu/.docker -R
+    chmod g+rwx /home/ubuntu/.docker -R
+
+- name: restart docker service
+  systemd:
+    state: restarted
+    daemon_reload: yes
+    name: docker
