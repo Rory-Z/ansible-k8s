@@ -31,8 +31,8 @@
     if [ -z $(egrep "^docker" /etc/group) ];then groupadd docker; fi
     usermod -aG docker ubuntu
     mkdir -p /home/ubuntu/.docker
-    chown ubuntu:ubuntu /home/ubuntu/.docker -R
-    chmod g+rwx /home/ubuntu/.docker -R
+    chown ubuntu:ubuntu /home/ubuntu/.docker /var/run/docker.sock -R
+    chmod g+rwx /home/ubuntu/.docker /var/run/docker.sock -R
 
 - name: restart docker service
   systemd:

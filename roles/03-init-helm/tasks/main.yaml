@@ -28,4 +28,4 @@
     kubectl create -f /tmp/rbac-tiller.yaml
     kubectl taint nodes "{{ ansible_hostname }}" node-role.kubernetes.io/master:NoSchedule-
     helm init --service-account tiller --node-selectors kubernetes.io/hostname="{{ ansible_hostname }}"
-    kubectl taint nodes "{{ ansible_hostname }}" node-role.kubernetes.io/master=:NoSchedule
+    # kubectl taint nodes "{{ ansible_hostname }}" node-role.kubernetes.io/master=:NoSchedule
