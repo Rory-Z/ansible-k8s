@@ -1,31 +1,19 @@
-- name: download helm
-  get_url:
-    url: https://storage.googleapis.com/kubernetes-helm/helm-v2.13.1-linux-amd64.tar.gz
-    dest: /tmp/helm.tar.gz
-
-- name: unarchive helm
-  unarchive:
-    src: /tmp/helm.tar.gz
-    remote_src: yes
-    dest: /tmp
-
-- name: install helm
+- name: install jq
   become: yes
   become_user: root
   become_method: sudo
-  shell: mv /tmp/linux-amd64/helm /usr/local/bin/helm
+  apt:
+    update_cache: yes
+    name: jq
 
-- name: scp tiller rbac
-  copy:
-    src: rbac-tiller.yaml
-    dest: /tmp/rbac-tiller.yaml
-    owner: "{{ user }}"
-    group: "{{ user }}"
-    mode: 0755
+- name: get helm scripts
+  get_url:
+    url: https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3
+    dest: /tmp/get-helm.sh
+    force: yes
 
-- name: helm init
+- name: run helm scripts
   shell: |
-    kubectl create -f /tmp/rbac-tiller.yaml
-    kubectl taint nodes "{{ ansible_hostname }}" node-role.kubernetes.io/master:NoSchedule-
-    helm init --service-account tiller --node-selectors kubernetes.io/hostname="{{ ansible_hostname }}"
-    # kubectl taint nodes "{{ ansible_hostname }}" node-role.kubernetes.io/master=:NoSchedule
+    if [ "$(kubectl get nodes -o json | jq '.items[].spec.taints')" != "null" ]; then kubectl taint nodes --all node-role.kubernetes.io/master-; fi
+    chmod +x /tmp/get-helm.sh
+    /tmp/get-helm.sh

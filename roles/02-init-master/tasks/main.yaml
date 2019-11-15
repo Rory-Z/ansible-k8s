@@ -3,7 +3,6 @@
 
 - name: kubeadm init
   shell: kubeadm init --pod-network-cidr=192.168.0.0/16
-#   shell: kubeadm init --pod-network-cidr=10.244.0.0/16
 
 - name: create kube directory
   file:
@@ -19,5 +18,4 @@
 
 - name: install network
   become: no
-  shell: kubectl apply -f https://docs.projectcalico.org/v3.7/manifests/calico.yaml
-#   shell: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+  shell: kubectl apply -f https://docs.projectcalico.org/v3.10/manifests/calico.yaml
